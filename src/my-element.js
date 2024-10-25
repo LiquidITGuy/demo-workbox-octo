@@ -1,5 +1,6 @@
 import {css, html, LitElement} from 'lit'
 
+
 /**
  * An example element.
  *
@@ -9,12 +10,13 @@ import {css, html, LitElement} from 'lit'
 export class MyElement extends LitElement {
   static get properties() {
     return {
-      listeLivres: []
+      listeLivres: Array
     }
   }
 
   constructor() {
     super()
+    this.listeLivres = []
   }
 
   async getLivres() {
@@ -22,8 +24,8 @@ export class MyElement extends LitElement {
     return await resultBrut.json()
   }
 
-  _onClick() {
-    this.listeLivres = this.getLivres()
+  async _onClick() {
+    this.listeLivres = await this.getLivres()
   }
 
   render() {
@@ -31,7 +33,11 @@ export class MyElement extends LitElement {
       <h1>Ma liste des livres</h1>
       <button @click=${this._onClick}>Télécharger la liste des livres</button>
       <ul>
-        <li>Titre</li>
+        ${this.listeLivres.map((livre) => 
+            html`<li>
+              <apercu-livre .titre="${livre.titre}" .couvertureUrl="https://cms-headless-core.ln1.eu${livre.couverture[0].url}"></apercu-livre>
+            </li>`
+        )}
       </ul>
     `
   }
