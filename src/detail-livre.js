@@ -1,4 +1,5 @@
 import {css, html, LitElement} from 'lit'
+import {Router, Routes} from "@lit-labs/router";
 
 
 /**
@@ -7,43 +8,36 @@ import {css, html, LitElement} from 'lit'
  * @slot - This element has a slot
  * @csspart button - The button
  */
-export class MyElement extends LitElement {
-  static get properties() {
-    return {
-      listeLivres: Array
+export class DetailLivre extends LitElement {
+    static get properties() {
+        return {
+            isbn: String
+        }
     }
-  }
 
-  constructor() {
-    super()
-    this.listeLivres = []
-  }
+    constructor() {
+        super()
+    }
 
-  async getLivres() {
-    const resultBrut = await fetch('https://cms-headless-core.ln1.eu/livres')
-    return await resultBrut.json()
-  }
+    async getLivre() {
+        const resultBrut = await fetch('https://cms-headless-core.ln1.eu/livres/' + this.isbn)
+        return await resultBrut.json()
+    }
 
-  async _onClick() {
-    this.listeLivres = await this.getLivres()
-  }
+    async _onClick() {
+        this.livre = await this.getLivre()
+        console.dir(this.livre)
+    }
 
-  render() {
-    return html`
-      <h1>Ma liste des livres</h1>
-      <button @click=${this._onClick}>Télécharger la liste des livres</button>
-      <ul>
-        ${this.listeLivres.map((livre) => 
-            html`<li>
-              <apercu-livre .titre="${livre.titre}" .couvertureUrl="https://cms-headless-core.ln1.eu${livre.couverture[0].url}"></apercu-livre>
-            </li>`
-        )}
-      </ul>
-    `
-  }
+    render() {
+        return html`
+            <h1>ISBN ${this.isbn}</h1>
+            <button @click=${this._onClick}>Télécharger le livre</button>
+        `
+    }
 
-  static get styles() {
-    return css`
+    static get styles() {
+        return css`
       :host {
         max-width: 1280px;
         margin: 0 auto;
@@ -93,7 +87,7 @@ export class MyElement extends LitElement {
         }
       }
     `
-  }
+    }
 }
 
-window.customElements.define('my-element', MyElement)
+window.customElements.define('detail-livre', DetailLivre)
