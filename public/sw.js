@@ -17,8 +17,25 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('fetch', (event) => {
-    console.info('SW: fetch');
+self.addEventListener('fetch', async (event) => {
+    if (event.request.url.includes('livres')) { // on met en cache uniquement les requêtes à 'livres'
+        const cache = await caches.match(event.request);
+        if (cache) {
+            console.log("Service Worker: Cache hit");
+            return cache;
+        }
+        try {
+            const response = await fetch(event.request);
+            await caches.open('api-cache').then(function(cache) {
+                console.log("Service Worker: Cache miss");
+                cache.put(event.request, response);
+            });
+            return response;
+        } catch (error) {
+            console.log("Service Worker: Error: ", error);
+        }
+    }
+
     const result = fetch(event.request)
     numberOfCall += 1
 
