@@ -1,8 +1,10 @@
+/*importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.2.0/workbox-sw.js');
+workbox.set.setConfig({
+    debug: false
+})*/
 const SW_VERSION = "1.0.0"
-let DEFAULT_NUMBER_OF_CALL = 0
-let DEFAULT_QUANTITY_OF_DATA = 0
 const CACHE_NAME = 'api-cache';
-const dataCached = new Map()
+const FAKE_CACHE_NAME = 'fake-cache';
 self.addEventListener('message', (event) => {
     if (event.data.type === 'GET_VERSION') {
         event.ports[0].postMessage(SW_VERSION);
@@ -21,22 +23,35 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', async (event) => {
     if (event.request.url.includes('livres')) { // on met en cache uniquement les requêtes à 'livres'
-        const cache = await caches.match(event.request);
-        if (cache) {
-            const value = dataCached.get(event.request.url)
-            if(value) {
-                dataCached.set(event.request.url, value + 1)
-            }
-            console.log("Service Worker: Cache hit value", value, '& url', event.request.url);
-            return cache;
+        const cache = await caches.open(CACHE_NAME);
+        const fakeCache = await caches.open(FAKE_CACHE_NAME);
+        const cachedRessource = await cache.match(event.request);
+        if (cachedRessource) {
+            const dataCached = await fakeCache.match(event.request.url)
+            const objectCached = await dataCached.json()
+            const { numberOfCall, quantityOfOneCall } = objectCached
+            console.log("Service Worker: Cache hit value ", numberOfCall+1 ," times & url'" , event.request.url," '& quantityOfData'", quantityOfOneCall);
+            const fakeObject = {...objectCached, numberOfCall: numberOfCall+1}
+            fakeCache.put(event.request.url, new Response(JSON.stringify(fakeObject)));
+            //console.log("Service Worker: Cache hit value", value, '& url', event.request.url);
+            return cachedRessource;
         }
         try {
             const response = await fetch(event.request);
-            await caches.open('api-cache').then(function(cache) {
-                console.log("Service Worker: Cache miss");
-                dataCached.set(event.request.url, 1)
-                cache.put(event.request, response);
-            });
+            let quantityOfData = 0
+            if(response.headers.get("content-length")) {
+                quantityOfData = Number(response.headers.get("content-length"))
+            }else {
+                const encoder = new TextEncoder();
+                const bytes = encoder.encode(response.body);
+                const contentSize = bytes.length;
+                quantityOfData = contentSize;
+            }
+            const fakeObject = {numberOfCall: 0, quantityOfOneCall: quantityOfData}
+            fakeCache.put(event.request.url, new Response(JSON.stringify(fakeObject)));
+            console.log("Service Worker: Cache miss & quantityOfData", quantityOfData);
+            const cache =  await caches.open(CACHE_NAME)
+            cache.put(event.request, response);
             return response;
         } catch (error) {
             console.log("Service Worker: Error: ", error);
