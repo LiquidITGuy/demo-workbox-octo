@@ -25,10 +25,20 @@ export class MyRouter extends LitElement {
             render: ({isbn}) => html`
                 <detail-livre .isbn=${isbn}/>`
         },
+        {
+            path: '/service-worker',
+            render: ({isbn}) => html`
+                <service-worker/>`
+        },
     ]);
 
     render() {
-        return this.router.outlet();
+        return html`
+                <h1>Mon application de livre</h1>
+                <a href="/">Accueil</a>
+                <a href="/service-worker">Service Worker</a>
+                ${this.router.outlet()}
+            `
     }
 
 }

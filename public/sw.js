@@ -1,13 +1,22 @@
-/*importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.2.0/workbox-sw.js');
-workbox.set.setConfig({
-    debug: false
-})*/
 const SW_VERSION = "1.0.0"
 const CACHE_NAME = 'api-cache';
 const FAKE_CACHE_NAME = 'fake-cache';
-self.addEventListener('message', (event) => {
+self.addEventListener('message', async (event) => {
     if (event.data.type === 'GET_VERSION') {
         event.ports[0].postMessage(SW_VERSION);
+    }
+    if (event.data.type === 'EMPTY_CACHE') {
+        //event.ports[0].postMessage(SW_VERSION);
+    }
+    if (event.data.type === 'GET_DATA') {
+        const fakeCache = await caches.open(FAKE_CACHE_NAME);
+        const dataCached = await fakeCache.matchAll()
+        const data = await Promise.all(dataCached.map(async (data) => {
+           const toto = await data.json()
+            console.log(toto)
+        }))
+        //console.log(event.ports)
+        //event.ports[0].postMessage(SW_VERSION);
     }
 });
 
