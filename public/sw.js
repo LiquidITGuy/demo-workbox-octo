@@ -1,6 +1,6 @@
 const SW_VERSION = "1.0.0"
-let numberOfCall = 0
-let quantityOfData = 0
+const CLE_HORS_LIGNE = 'offline';
+
 self.addEventListener('message', (event) => {
     if (event.data.type === 'GET_VERSION') {
         event.ports[0].postMessage(SW_VERSION);
@@ -10,6 +10,12 @@ self.addEventListener('message', (event) => {
 self.addEventListener('install', (event) => {
     console.info('SW: install');
     event.waitUntil(self.skipWaiting());
+    
+    event.waitUntil(caches.open(CLE_HORS_LIGNE).then((cache) => {
+        return cache.addAll([
+            'offline.html',
+        ]);
+    }));
 });
 
 self.addEventListener('activate', (event) => {
@@ -17,22 +23,25 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', async (event) => {
     console.info('SW: fetch');
-    const result = fetch(event.request)
-    numberOfCall += 1
+    /*try {
+        const result = await fetch(event.request)
+        
+        return result;
+    } catch {
+        const cache = await caches.open(CLE_HORS_LIGNE);
+        const pageHorsLigne = await cache.match("/offline.html");
+        return event.respondWith(pageHorsLigne)
+    }*/
 
-    result.then(response => {
-        if(response.headers.get("content-length")) {
-            quantityOfData += Number(response.headers.get("content-length"))
-        }else {
-            const encoder = new TextEncoder();
-            const bytes = encoder.encode(response.body);
-            const contentSize = bytes.length;
-            quantityOfData += contentSize;           }
-    })
-
-    console.log("numberOfCall", numberOfCall)
-    console.log("quantityOfData", quantityOfData/1024/1024)
-    event.respondWith(result);
+    // Open the cache
+    event.respondWith(caches.open(CLE_HORS_LIGNE).then((cache) => {
+        // Go to the network first
+        return fetch(event.request).catch(() => {
+            // If the network is unavailable, get
+            return cache.match("/offline.html");
+        });
+    }));
 });
+
