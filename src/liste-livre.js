@@ -38,7 +38,7 @@ export class ListeLivre extends LitElement {
                         html`
                             <li>
                                 <apercu-livre .titre="${livre.titre}"
-                                              .couvertureUrl="https://cms-headless-core.ln1.eu${livre.couverture[0].url}"></apercu-livre>
+                                              .couvertureUrl="https://cms-headless-core.ln1.eu${livre.couverture[0].formats.thumbnail.url}"></apercu-livre>
                                 <a href="/details/${livre.id}">Details</a>
                             </li>`
                 )}

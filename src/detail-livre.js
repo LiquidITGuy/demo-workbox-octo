@@ -1,6 +1,4 @@
 import {css, html, LitElement} from 'lit'
-import {Router, Routes} from "@lit-labs/router";
-
 
 /**
  * An example element.
@@ -11,12 +9,14 @@ import {Router, Routes} from "@lit-labs/router";
 export class DetailLivre extends LitElement {
     static get properties() {
         return {
-            isbn: String
+            isbn: String,
+            _livre: Object,
         }
     }
-
+    
     constructor() {
         super()
+        this._livre = {};
     }
 
     async getLivre() {
@@ -25,17 +25,24 @@ export class DetailLivre extends LitElement {
     }
 
     async _onClick() {
-        this.livre = await this.getLivre()
-        console.dir(this.livre)
+        this._livre = await this.getLivre()
     }
 
     render() {
         return html`
             <h1>ISBN ${this.isbn}</h1>
             <button @click=${this._onClick}>Télécharger le livre</button>
+            ${this._livre && this._livre.id && html`
+            <div>
+                <h2>Livre téléchargé</h2>
+                <img .src="https://cms-headless-core.ln1.eu${this._livre.couverture[0].url}" .alt="${this._livre.couverture[0].alternativeText}"/>
+                <h3>${this._livre.titre}</h3>
+                <p>${this._livre.description}</p>
+            </div>
+            `} 
         `
     }
-
+    
     static get styles() {
         return css`
       :host {

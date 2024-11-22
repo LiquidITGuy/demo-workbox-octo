@@ -26,16 +26,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', async (event) => {
     console.info('SW: fetch');
-    /*try {
-        const result = await fetch(event.request)
-        
-        return result;
-    } catch {
-        const cache = await caches.open(CLE_HORS_LIGNE);
-        const pageHorsLigne = await cache.match("/offline.html");
-        return event.respondWith(pageHorsLigne)
-    }*/
-
+    
     // Open the cache
     event.respondWith(caches.open(CLE_HORS_LIGNE).then((cache) => {
         // Go to the network first
