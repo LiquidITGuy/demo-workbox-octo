@@ -14,6 +14,7 @@ self.addEventListener('install', (event) => {
     event.waitUntil(caches.open(CLE_HORS_LIGNE).then((cache) => {
         return cache.addAll([
             'offline.html',
+            'offline.json'
         ]);
     }));
 });
@@ -39,8 +40,12 @@ self.addEventListener('fetch', async (event) => {
     event.respondWith(caches.open(CLE_HORS_LIGNE).then((cache) => {
         // Go to the network first
         return fetch(event.request).catch(() => {
+            // If the network is unavailable && it's an api call, get
+            if (event.request.url.includes('cms-headless-core')) {
+                return cache.match("/offline.json");
+            }
             // If the network is unavailable, get
-            return cache.match("/offline.html");
+            return cache.match('/offline.html');
         });
     }));
 });
