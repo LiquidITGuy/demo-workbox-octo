@@ -27,17 +27,20 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', async (event) => {
     console.info('SW: fetch');
     
-    // Open the cache
-    event.respondWith(caches.open(CLE_HORS_LIGNE).then((cache) => {
-        // Go to the network first
-        return fetch(event.request).catch(() => {
-            // If the network is unavailable && it's an api call, get
-            if (event.request.url.includes('cms-headless-core')) {
-                return cache.match("/offline.json");
+    event.respondWith(
+        (async () => {
+            const cacheHorsLigne = await caches.open(CLE_HORS_LIGNE);
+            try {
+                return await fetch(event.request);
+            } catch(e) {
+                console.dir(e)
+               
+                if (event.request.url.includes('cms-headless-core')) {
+                    return await cacheHorsLigne.match("/offline.json");
+                }
+                
+                return await cacheHorsLigne.match("/offline.html");
             }
-            // If the network is unavailable, get
-            return cache.match('/offline.html');
-        });
-    }));
+        })(),
+    );
 });
-

@@ -34,7 +34,7 @@ export class ListeLivre extends LitElement {
             <h1>Ma liste des livres</h1>
             <button @click=${this._onClick}>Télécharger la liste des livres</button>
             <ul>
-                ${this.listeLivres.map((livre) =>
+                ${this.listeLivres && this.listeLivres.status !== 'KO' && this.listeLivres.map((livre) =>
                         html`
                             <li>
                                 <apercu-livre .titre="${livre.titre}"
