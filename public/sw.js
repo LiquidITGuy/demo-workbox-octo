@@ -45,6 +45,17 @@ self.addEventListener('fetch', async (event) => {
             
             // si on a une page cachée
             if (pageCache) {
+                // stocke le résultat de la requete
+                fetch(event.request)
+                    .then((result) => {
+                        // place le resultat dans le cache
+                        cacheRessources.put(event.request, result.clone());
+                    }).then(() => {
+                        console.log('Contenu du cache mis à jour');
+                    }).catch(() => {
+                        console.log('Contenu non mis à jour');
+                    });
+                
                 // renvoie la page cachée
                 return cacheRessources.match(event.request)
             } else {
