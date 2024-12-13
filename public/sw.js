@@ -38,43 +38,19 @@ self.addEventListener('fetch', async (event) => {
             
             // ouverture ou création des caches
             const cacheRessources = await caches.open(CLE_RESSOURCES);
-            const cacheHorsLigne = await caches.open(CLE_HORS_LIGNE);
             
-            // récupération de la page cachée
-            const pageCache = await cacheRessources.match(event.request.url)
-            
-            // si on a une page cachée
-            if (pageCache) {
+            try {
+                // stocke le résultat de la requete
+                const result = await fetch(event.request);
+                // place le resultat dans le cache
+                await cacheRessources.put(event.request, result.clone())
+                // renvoie le resultat
+                return result
+            } catch (e) {
                 // renvoie la page cachée
                 return cacheRessources.match(event.request)
-            } else {
-                try {
-                    // stocke le résultat de la requete
-                    const result = await fetch(event.request);
-                    // place le resultat dans le cache
-                    await cacheRessources.put(event.request, result.clone())
-                    // renvoie le resultat
-                    return result
-                } catch (e) {
-                    console.log(e)
-                }
             }
             
-            // comportement par défaut
-            try {
-                // renvoie le resultat de la requete
-                return await fetch(event.request);
-            } catch(e) {
-                console.dir(e)
-               
-                // si l'api n'est pas joignable
-                if (event.request.url.includes('cms-headless-core')) {
-                    return await cacheHorsLigne.match("/offline.json");
-                }
-                
-                // si on est hors-ligne
-                return await cacheHorsLigne.match("/offline.html");
-            }
         })(),
     );
 });
