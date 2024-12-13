@@ -1,4 +1,5 @@
 import {css, html, LitElement} from 'lit'
+import {live} from 'lit/directives/live.js';
 import {Router, Routes} from "@lit-labs/router";
 
 
@@ -11,13 +12,17 @@ import {Router, Routes} from "@lit-labs/router";
 export class ListeLivre extends LitElement {
     static get properties() {
         return {
-            listeLivres: Array
+            listeLivres: Array,
+            listeLivreTrouve: Array,
+            searchedValue: Object,
         }
     }
 
     constructor() {
         super()
         this.listeLivres = []
+        this.listeLivreTrouve = []
+        this.searchedValue = {value:'toto'}
     }
 
     async getLivres() {
@@ -29,9 +34,31 @@ export class ListeLivre extends LitElement {
         this.listeLivres = await this.getLivres()
     }
 
+    async rechercheLivre(livreSepareParDesEspaces) {
+        const resultBrut = await fetch('https://mon-moteur-de-recherche.ln1.eu/livres?query='+livreSepareParDesEspaces)
+        return await resultBrut.json()
+    }
+    
+    async _onSearch(event){
+        event.preventDefault()
+        console.log(this.searchedValue)
+        this.listeLivreTrouve = await this.rechercheLivre('toto')
+    } 
+
     render() {
         return html`
             <h1>Ma liste des livres</h1>
+            <div>
+                <form action="" method="post" @submit=${this._onSearch}>
+                    <label for="recherche-livre">Rechercher un livre</label>
+                    <input type="text" name="recherche" id="recherche-livre" .value=${live(this.searchedValue.value)}>
+                    <button type="submit">Rechercher</button>
+                </form>
+                <div>
+                    Résultat de la recherche
+                    ${JSON.stringify(this.listeLivreTrouve)}
+                </div>
+            </div>
             <button @click=${this._onClick}>Télécharger la liste des livres</button>
             <ul>
                 ${this.listeLivres && this.listeLivres.status !== 'KO' && this.listeLivres.map((livre) =>

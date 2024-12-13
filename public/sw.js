@@ -28,6 +28,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', async (event) => {
     console.info('SW: fetch');
     
+    if(event.request.url.includes('recherche')){
+        
+        return event.respondWith(rechercherDesLivres('toto'))
+    }
+    
     event.respondWith(
         (async () => {
             // Si l'url de la requete provient d'une extension chrome
@@ -89,3 +94,10 @@ self.addEventListener('fetch', async (event) => {
         })(),
     );
 });
+
+
+const rechercherDesLivres = async (listeNomLivres) => {
+    const obj = JSON.stringify({'Prop': 'some value'})
+    const response = new Response(obj)
+    return response
+}
