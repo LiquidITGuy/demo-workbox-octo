@@ -31,6 +31,7 @@ export class DetailLivre extends LitElement {
     render() {
         return html`
             <h1>ISBN ${this.isbn}</h1>
+            <a href="/">Retour</a>
             <button @click=${this._onClick}>Télécharger le livre</button>
             ${this._livre && this._livre.id && html`
             <div>
