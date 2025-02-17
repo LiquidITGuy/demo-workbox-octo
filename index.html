@@ -18,7 +18,19 @@
 
 <script type="module">
   import {Workbox} from 'https://storage.googleapis.com/workbox-cdn/releases/6.2.0/workbox-window.prod.mjs';
+  import { initializeApp } from 'firebase/app';
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyBdNK-1J_MG2ovS2yfZbGb6IiwWS4hMd8E",
+    authDomain: "fir-workbox-octo.firebaseapp.com",
+    projectId: "fir-workbox-octo",
+    storageBucket: "fir-workbox-octo.firebasestorage.app",
+    messagingSenderId: "1078050585511",
+    appId: "1:1078050585511:web:0c8474fd351c5935045482"
+  };
 
+  const app = initializeApp(firebaseConfig);
+  
   if ('serviceWorker' in navigator) {
     const wb = new Workbox('/sw.js');
 

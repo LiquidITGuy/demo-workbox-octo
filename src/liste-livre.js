@@ -1,7 +1,6 @@
 import {css, html, LitElement} from 'lit'
 import {live} from 'lit/directives/live.js';
-import {Router, Routes} from "@lit-labs/router";
-
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 /**
  * An example element.
@@ -43,11 +42,28 @@ export class ListeLivre extends LitElement {
         event.preventDefault()
         console.log(this.searchedValue)
         this.listeLivreTrouve = await this.rechercheLivre('toto')
-    } 
+    }
+    
+    async _onSubscribe(event) {
+        await Notification.requestPermission().then((permission) => {
+            if (permission === "granted") {
+                navigator.serviceWorker.ready.then(async (registration) => {
+                    const messaging = getMessaging();
+                    const currentToken = await getToken(messaging, {vapidKey: "BLIrGMfcxZtrWeu-wpHRkt74EwcvmTP54EPDmEsjgnCEeufxBxHFP6g-NeAILKATuxITKQxWruRNXzeepuzRwYE"})
+                    console.log({currentToken})
+                    onMessage(messaging, (payload) => {
+                        console.log('Message received. ', payload);
+                        // ...
+                    });
+                })
+            }
+        });
+    }
 
     render() {
         return html`
             <h1>Ma liste des livres</h1>
+            <button @click=${this._onSubscribe}>S'abonner aux nouvelles sorties</button>
             <div>
                 <form action="" method="post" @submit=${this._onSearch}>
                     <label for="recherche-livre">Rechercher un livre</label>

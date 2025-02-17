@@ -27,6 +27,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', async (event) => {
     console.info('SW: fetch');
+    console.log(event.request)
     
     if(event.request.url.includes('recherche')){
         
